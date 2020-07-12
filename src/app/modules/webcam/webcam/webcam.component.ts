@@ -31,6 +31,8 @@ export class WebcamComponent implements AfterViewInit, OnDestroy {
   @Input() public imageType: string = WebcamComponent.DEFAULT_IMAGE_TYPE;
   /** The image quality to use when capturing snapshots (number between 0 and 1) */
   @Input() public imageQuality: number = WebcamComponent.DEFAULT_IMAGE_QUALITY;
+  /** Initial DeviceId to start webcam with **/
+  @Input() public initialDeviceId: string = undefined;
 
   /** EventEmitter which fires when an image has been captured */
   @Output() public imageCapture: EventEmitter<WebcamImage> = new EventEmitter<WebcamImage>();
@@ -187,12 +189,12 @@ export class WebcamComponent implements AfterViewInit, OnDestroy {
     this.detectAvailableDevices()
       .then(() => {
         // start video
-        this.switchToVideoInput(null);
+        this.switchToVideoInput(this.initialDeviceId);
       })
       .catch((err: string) => {
         this.initError.next(<WebcamInitError>{message: err});
         // fallback: still try to load webcam, even if device enumeration failed
-        this.switchToVideoInput(null);
+        this.switchToVideoInput(this.initialDeviceId);
       });
   }
 
