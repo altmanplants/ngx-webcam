@@ -1,5 +1,6 @@
 .webcam-wrapper {
   display: inline-block;
+  overflow: hidden;
   position: relative;
   line-height: 0;
 
@@ -29,5 +30,10 @@
     &:hover {
       background-color: rgba(0, 0, 0, 0.18);
     }
+  }
+
+  video {
+    width: 100%;
+    height: auto;
   }
 }

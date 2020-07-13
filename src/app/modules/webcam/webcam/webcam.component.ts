@@ -209,21 +209,25 @@ export class WebcamComponent implements AfterViewInit, OnDestroy {
    * Takes a snapshot of the current webcam's view and emits the image as an event
    */
   public takeSnapshot(): void {
-    // set canvas size to actual video size
+    // pause video to prevent motion/video changing while saving image on slow devices
     const _video = this.nativeVideoElement;
+    _video.pause();
+
+    // set canvas size to actual video size
     const dimensions = {width: this.width, height: this.height};
+    // override with video dimensions or crop by this aspect ratio
     if (_video.videoWidth) {
-      dimensions.width = _video.videoWidth;
-      dimensions.height = _video.videoHeight;
+      dimensions.width = Math.min(_video.videoWidth, _video.videoHeight * (this.width / this.height));
+      dimensions.height = Math.min(_video.videoHeight, _video.videoWidth / (this.width / this.height));
     }
 
     const _canvas = this.canvas.nativeElement;
     _canvas.width = dimensions.width;
     _canvas.height = dimensions.height;
 
-    // paint snapshot image to canvas
+    // paint snapshot image to canvas, using sub square dimensions to crop video feed
     const context2d = _canvas.getContext('2d');
-    context2d.drawImage(_video, 0, 0);
+    context2d.drawImage(_video, 0, 0, _canvas.width, _canvas.height, 0, 0, _canvas.width, _canvas.height);
 
     // read canvas content as image
     const mimeType: string = this.imageType ? this.imageType : WebcamComponent.DEFAULT_IMAGE_TYPE;
@@ -271,13 +275,13 @@ export class WebcamComponent implements AfterViewInit, OnDestroy {
   }
 
   public get videoWidth() {
-    const videoRatio = this.getVideoAspectRatio();
-    return Math.min(this.width, this.height * videoRatio);
+    // const videoRatio = this.getVideoAspectRatio();
+    return this.width;// Math.min(this.width, this.height * videoRatio);
   }
 
   public get videoHeight() {
-    const videoRatio = this.getVideoAspectRatio();
-    return Math.min(this.height, this.width / videoRatio);
+    // const videoRatio = this.getVideoAspectRatio();
+    return this.height;//Math.min(this.height, this.width / videoRatio);
   }
 
   public get videoStyleClasses() {
