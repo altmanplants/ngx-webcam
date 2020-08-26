@@ -320,25 +320,30 @@ export class WebcamComponent implements AfterViewInit, OnDestroy {
         .then((stream: MediaStream) => {
           this.mediaStream = stream;
           _video.srcObject = stream;
-          _video.play();
+          _video.play()
+            .then(_ => {
+              this.activeVideoSettings = stream.getVideoTracks()[0].getSettings();
+              const activeDeviceId: string = WebcamComponent.getDeviceIdFromMediaStreamTrack(stream.getVideoTracks()[0]);
 
-          this.activeVideoSettings = stream.getVideoTracks()[0].getSettings();
-          const activeDeviceId: string = WebcamComponent.getDeviceIdFromMediaStreamTrack(stream.getVideoTracks()[0]);
+              this.cameraSwitched.next(activeDeviceId);
 
-          this.cameraSwitched.next(activeDeviceId);
-
-          // Initial detect may run before user gave permissions, returning no deviceIds. This prevents later camera switches. (#47)
-          // Run detect once again within getUserMedia callback, to make sure this time we have permissions and get deviceIds.
-          this.detectAvailableDevices()
-            .then(() => {
-              this.activeVideoInputIndex = activeDeviceId ? this.availableVideoInputs
-                .findIndex((mediaDeviceInfo: MediaDeviceInfo) => mediaDeviceInfo.deviceId === activeDeviceId) : -1;
-              this.videoInitialized = true;
+              // Initial detect may run before user gave permissions, returning no deviceIds. This prevents later camera switches. (#47)
+              // Run detect once again within getUserMedia callback, to make sure this time we have permissions and get deviceIds.
+              this.detectAvailableDevices()
+                .then(() => {
+                  this.activeVideoInputIndex = activeDeviceId ? this.availableVideoInputs
+                    .findIndex((mediaDeviceInfo: MediaDeviceInfo) => mediaDeviceInfo.deviceId === activeDeviceId) : -1;
+                  this.videoInitialized = true;
+                })
+                .catch(() => {
+                  this.activeVideoInputIndex = -1;
+                  this.videoInitialized = true;
+                });
             })
-            .catch(() => {
-              this.activeVideoInputIndex = -1;
-              this.videoInitialized = true;
+            .catch(err => {
+              this.initError.next(<WebcamInitError>{ message: err.message, mediaStreamError: err });
             });
+
         })
         .catch((err: MediaStreamError) => {
           this.initError.next(<WebcamInitError>{message: err.message, mediaStreamError: err});
