@@ -276,12 +276,12 @@ export class WebcamComponent implements AfterViewInit, OnDestroy {
 
   public get videoWidth() {
     // const videoRatio = this.getVideoAspectRatio();
-    return this.width;// Math.min(this.width, this.height * videoRatio);
+    return this.width; // Math.min(this.width, this.height * videoRatio);
   }
 
   public get videoHeight() {
     // const videoRatio = this.getVideoAspectRatio();
-    return this.height;//Math.min(this.height, this.width / videoRatio);
+    return this.height; // Math.min(this.height, this.width / videoRatio);
   }
 
   public get videoStyleClasses() {
